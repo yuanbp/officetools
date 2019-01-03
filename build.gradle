@@ -1,0 +1,138 @@
+group 'com.chieftain'
+version '1.0'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+//指定编译的编码
+tasks.withType(JavaCompile){
+    options.encoding = "UTF-8"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+buildscript {
+
+}
+
+ext {
+    groupid='com.chieftain'
+    artifactId='officetools'
+    version='1.0'
+    poiv='3.10-FINAL'
+    gsonv='2.3.1'
+    servletv='3.1.0'
+    commonsv='3.7'
+    println '申明变量'
+}
+
+dependencies {
+    compile "javax.servlet:javax.servlet-api:${servletv}"
+    compile "org.apache.poi:poi-ooxml:${poiv}"
+    compile "com.google.code.gson:gson:${gsonv}"
+    compile "org.apache.commons:commons-lang3:${commonsv}"
+    compile "javax.validation:validation-api:2.0.1.Final"
+    compile "com.thoughtworks.xstream:xstream:1.4.10"
+    compile 'org.freemarker:freemarker:2.3.26-incubating'
+    compile "fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.core:1.0.5"
+    compile "fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.pdf:1.0.5"
+    compile "fr.opensagres.xdocreport:fr.opensagres.xdocreport.itext.extension:1.0.5"
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java' // 指定源码目录
+        }
+        resources {
+            srcDir 'src/main/resources' //资源目录
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java' // 指定源码目录
+        }
+        resources {
+            srcDir 'src/test/resources' //资源目录
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'officetools[Gradle Quickstart]', 'Implementation-Version': version
+    }
+}
+
+javadoc {
+    options {
+        encoding "UTF-8"
+        charSet 'UTF-8'
+        links "http://docs.oracle.com/javase/7/docs/api"
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+test {
+    systemProperties 'property': 'value'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.groupId = project.group
+            pom.version = project.version
+            pom.artifactId = project.name
+            pom.project {
+
+                name project.name
+                packaging 'jar'
+                description 'java工具jar，包含各种util'
+
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution '放在内网不开源了'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'chieftain'
+                        name 'Baiping Yuan'
+                    }
+                }
+            }
+
+            repository(url: "http://192.168.145.170:8081/nexus/content/repositories/releases/") {
+                authentication(userName: "admin", password: "admin123")
+            }
+        }
+    }
+}
